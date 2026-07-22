@@ -13,7 +13,7 @@
         "repo": "kzhrknt/add-ja-subs"
       },
       "description": "英語動画に日本語字幕を焼き込む全ローカルAIパイプライン（Whisper ASR + エージェント翻訳 + ffmpeg）",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "kzhrknt"
       }

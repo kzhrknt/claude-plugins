@@ -1,0 +1,22 @@
+{
+  "name": "kzhrknt",
+  "owner": {
+    "name": "kzhrknt",
+    "url": "https://github.com/kzhrknt"
+  },
+  "description": "kzhrknt の Claude Code プラグイン棚 — AI活用の実務パイプラインを配布",
+  "plugins": [
+    {
+      "name": "add-ja-subs",
+      "source": {
+        "source": "github",
+        "repo": "kzhrknt/add-ja-subs"
+      },
+      "description": "英語動画に日本語字幕を焼き込む全ローカルAIパイプライン（Whisper ASR + エージェント翻訳 + ffmpeg）",
+      "version": "0.1.0",
+      "author": {
+        "name": "kzhrknt"
+      }
+    }
+  ]
+}

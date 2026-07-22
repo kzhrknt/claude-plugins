@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>kzhrknt / claude-plugins — Claude Code プラグイン棚</title>
 <meta name="description" content="AI活用の実務パイプラインを Claude Code プラグインとして配布。棚の登録は一度だけ、新作は自動で届く。">
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <style>
   :root {
     --bg: #0f1115;
@@ -109,6 +111,7 @@
     padding: 24px;
     margin: 16px 0;
     transition: border-color 0.15s;
+    cursor: pointer;
   }
   .card:hover { border-color: var(--accent); }
   .card .name-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
@@ -123,13 +126,7 @@
   }
   .card p { margin-top: 8px; color: var(--text-dim); font-size: 0.95rem; }
   .card .links { margin-top: 14px; display: flex; gap: 16px; flex-wrap: wrap; }
-  .card a {
-    color: var(--accent);
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 600;
-  }
-  .card a:hover { text-decoration: underline; }
+  .card .more { color: var(--accent); font-size: 0.88rem; font-weight: 600; }
   .card .install {
     margin-top: 12px;
     font-family: ui-monospace, monospace;
@@ -141,7 +138,76 @@
     overflow-x: auto;
     white-space: nowrap;
   }
-  #plugin-list .loading { color: var(--text-dim); font-size: 0.9rem; }
+  #plugin-list .loading, #detail .loading { color: var(--text-dim); font-size: 0.9rem; }
+  a { color: var(--accent); }
+
+  /* ---- detail view ---- */
+  #detail { display: none; }
+  #detail.active { display: block; }
+  #home.hidden { display: none; }
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 40px 0 0;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .back:hover { color: var(--accent); }
+  .detail-head { padding: 24px 0 8px; }
+  .detail-head .name-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .detail-head h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+  .detail-head .ver {
+    font-size: 0.8rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-family: ui-monospace, monospace;
+  }
+  .detail-head .gh { font-size: 0.88rem; font-weight: 600; text-decoration: none; }
+  .detail-head .gh:hover { text-decoration: underline; }
+
+  /* ---- rendered markdown ---- */
+  .md {
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+    padding: 32px 0 64px;
+    font-size: 0.95rem;
+  }
+  .md h1, .md h2, .md h3 { margin: 1.6em 0 0.6em; line-height: 1.4; font-weight: 800; display: block; }
+  .md h1 { font-size: 1.5rem; }
+  .md h2 { font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .md h3 { font-size: 1.05rem; }
+  .md h1:first-child { margin-top: 0; }
+  .md p, .md ul, .md ol, .md table, .md blockquote { margin: 0.9em 0; }
+  .md ul, .md ol { padding-left: 1.6em; }
+  .md li { margin: 0.3em 0; }
+  .md img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+  .md code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 2px 6px;
+  }
+  .md pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0.9em 0;
+  }
+  .md pre code { background: none; padding: 0; font-size: 0.85rem; }
+  .md table { border-collapse: collapse; display: block; overflow-x: auto; }
+  .md th, .md td { border: 1px solid var(--border); padding: 8px 14px; text-align: left; }
+  .md th { background: var(--code-bg); font-weight: 700; }
+  .md blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text-dim); }
+  .md hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
   footer {
     border-top: 1px solid var(--border);
     padding: 40px 0 64px;
@@ -155,28 +221,36 @@
 <body>
 <div class="wrap">
 
-<header>
-  <div class="eyebrow">Claude Code Plugin Marketplace</div>
-  <h1>kzhrknt の<br>プラグイン棚</h1>
-  <p class="lead">
-    AI活用の実務パイプラインを、Claude Code プラグインとして配布しています。
-    <strong>棚の登録は一度だけ。</strong>あとは欲しいものを install するだけで、以後の新作もこの棚に並びます。
-  </p>
-</header>
+<div id="home">
+  <header>
+    <div class="eyebrow">Claude Code Plugin Marketplace</div>
+    <h1>kzhrknt の<br>プラグイン棚</h1>
+    <p class="lead">
+      AI活用の実務パイプラインを、Claude Code プラグインとして配布しています。
+      <strong>棚の登録は一度だけ。</strong>あとは欲しいものを install するだけで、以後の新作もこの棚に並びます。
+    </p>
+  </header>
 
-<section>
-  <h2><span class="num">1</span>棚を登録する（初回のみ）</h2>
-  <div class="cmd">
-    <code>/plugin marketplace add kzhrknt/claude-plugins</code>
-    <button onclick="copyCmd(this)">コピー</button>
-  </div>
-  <p class="hint">Claude Code のプロンプトにそのまま貼り付けてください。</p>
-</section>
+  <section>
+    <h2><span class="num">1</span>棚を登録する（初回のみ）</h2>
+    <div class="cmd">
+      <code>/plugin marketplace add kzhrknt/claude-plugins</code>
+      <button onclick="copyCmd(event, this)">コピー</button>
+    </div>
+    <p class="hint">Claude Code のプロンプトにそのまま貼り付けてください。</p>
+  </section>
 
-<section>
-  <h2><span class="num">2</span>プラグインを選んで入れる</h2>
-  <div id="plugin-list"><p class="loading">プラグイン一覧を読み込み中…</p></div>
-</section>
+  <section>
+    <h2><span class="num">2</span>プラグインを選んで入れる</h2>
+    <div id="plugin-list"><p class="loading">プラグイン一覧を読み込み中…</p></div>
+    <p class="hint">カードをクリックすると詳細（README）が読めます。</p>
+  </section>
+</div>
+
+<div id="detail">
+  <a class="back" href="#">← 棚にもどる</a>
+  <div id="detail-body"></div>
+</div>
 
 <footer>
   <p>
@@ -188,7 +262,11 @@
 </div>
 
 <script>
-function copyCmd(btn) {
+const CATALOG = "https://raw.githubusercontent.com/kzhrknt/claude-plugins/main/.claude-plugin/marketplace.json";
+let catalog = null;
+
+function copyCmd(ev, btn) {
+  ev.stopPropagation();
   const code = btn.parentElement.querySelector("code").textContent;
   navigator.clipboard.writeText(code).then(() => {
     btn.textContent = "コピー済み";
@@ -197,36 +275,95 @@ function copyCmd(btn) {
   });
 }
 
-// 棚のカタログ(marketplace.json)をそのまま読んで描画する。
-// プラグインを追記すればこのページも自動で追従する。
-const CATALOG = "https://raw.githubusercontent.com/kzhrknt/claude-plugins/main/.claude-plugin/marketplace.json";
+function repoOf(p) {
+  return p.source && p.source.repo ? p.source.repo : null;
+}
+
+function renderList() {
+  const list = document.getElementById("plugin-list");
+  list.innerHTML = "";
+  catalog.plugins.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.onclick = () => { location.hash = "#/p/" + p.name; };
+    card.innerHTML = `
+      <div class="name-row">
+        <span class="name">${p.name}</span>
+        ${p.version ? `<span class="ver">v${p.version}</span>` : ""}
+      </div>
+      <p>${p.description || ""}</p>
+      <div class="install">/plugin install ${p.name}@${catalog.name}</div>
+      <div class="links"><span class="more">詳細を見る →</span></div>`;
+    list.appendChild(card);
+  });
+}
+
+async function renderDetail(name) {
+  const p = catalog.plugins.find(x => x.name === name);
+  const body = document.getElementById("detail-body");
+  if (!p) { body.innerHTML = '<p class="loading">プラグインが見つかりません。</p>'; return; }
+  const repo = repoOf(p);
+  body.innerHTML = `
+    <div class="detail-head">
+      <div class="name-row">
+        <h1>${p.name}</h1>
+        ${p.version ? `<span class="ver">v${p.version}</span>` : ""}
+      </div>
+      <p class="hint">${p.description || ""}</p>
+      <div class="cmd">
+        <code>/plugin install ${p.name}@${catalog.name}</code>
+        <button onclick="copyCmd(event, this)">コピー</button>
+      </div>
+      ${repo ? `<a class="gh" href="https://github.com/${repo}">GitHub リポジトリ →</a>` : ""}
+    </div>
+    <div class="md"><p class="loading">README を読み込み中…</p></div>`;
+  if (!repo) return;
+
+  const rawBase = `https://raw.githubusercontent.com/${repo}/main/`;
+  const mdEl = body.querySelector(".md");
+  try {
+    const res = await fetch(rawBase + "README.md");
+    if (!res.ok) throw new Error(res.status);
+    const text = await res.text();
+    mdEl.innerHTML = DOMPurify.sanitize(marked.parse(text));
+    // README内の相対パス（画像・リンク）をリポジトリ基準の絶対URLに直す
+    mdEl.querySelectorAll("img").forEach(img => {
+      const src = img.getAttribute("src") || "";
+      if (!/^(https?:)?\/\//.test(src)) img.src = rawBase + src.replace(/^\.\//, "");
+    });
+    mdEl.querySelectorAll("a").forEach(a => {
+      const href = a.getAttribute("href") || "";
+      if (!/^(https?:)?\/\/|^#/.test(href)) a.href = `https://github.com/${repo}/blob/main/` + href.replace(/^\.\//, "");
+    });
+  } catch (e) {
+    mdEl.innerHTML = `<p class="loading">README を取得できませんでした。<a href="https://github.com/${repo}">GitHubで見る →</a></p>`;
+  }
+}
+
+function route() {
+  const m = location.hash.match(/^#\/p\/(.+)$/);
+  const home = document.getElementById("home");
+  const detail = document.getElementById("detail");
+  if (m && catalog) {
+    home.classList.add("hidden");
+    detail.classList.add("active");
+    renderDetail(decodeURIComponent(m[1]));
+    window.scrollTo(0, 0);
+  } else {
+    home.classList.remove("hidden");
+    detail.classList.remove("active");
+  }
+}
 
 fetch(CATALOG)
   .then(r => r.json())
-  .then(mp => {
-    const list = document.getElementById("plugin-list");
-    list.innerHTML = "";
-    mp.plugins.forEach(p => {
-      const repo = p.source && p.source.repo ? p.source.repo : null;
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="name-row">
-          <span class="name">${p.name}</span>
-          ${p.version ? `<span class="ver">v${p.version}</span>` : ""}
-        </div>
-        <p>${p.description || ""}</p>
-        <div class="install">/plugin install ${p.name}@${mp.name}</div>
-        <div class="links">
-          ${repo ? `<a href="https://github.com/${repo}">GitHub リポジトリ →</a>` : ""}
-        </div>`;
-      list.appendChild(card);
-    });
-  })
+  .then(mp => { catalog = mp; renderList(); route(); })
   .catch(() => {
     document.getElementById("plugin-list").innerHTML =
       '<p class="loading">一覧を取得できませんでした。<a href="https://github.com/kzhrknt/claude-plugins">GitHubで見る →</a></p>';
   });
+
+window.addEventListener("hashchange", route);
 </script>
 </body>
 </html>

@@ -3,247 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>kzhrknt / claude-plugins — Claude Code プラグイン棚</title>
+<title>kzhrknt のプラグイン棚 — claude-plugins</title>
 <meta name="description" content="AI活用の実務パイプラインを Claude Code プラグインとして配布。棚の登録は一度だけ、新作は自動で届く。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@700;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <style>
   :root {
-    --bg: #0f1115;
-    --bg-card: #171a21;
-    --text: #e8eaf0;
-    --text-dim: #9aa1b0;
-    --accent: #d97748;
-    --accent-soft: rgba(217, 119, 72, 0.12);
-    --border: #262b36;
-    --code-bg: #1c202a;
+    --washi: #F5F3EC;      /* 和紙 */
+    --paper: #FCFBF7;      /* 白紙（カード） */
+    --ink: #1B2B45;        /* 藍墨 */
+    --ai: #2E4E80;         /* 藍（リンク・操作） */
+    --dim: #5A7195;        /* 淡藍 */
+    --shu: #C73E3A;        /* 朱（落款のみ） */
+    --line: #D8D4C8;       /* 罫 */
+    --term: #16233C;       /* 端末（藍の夜） */
+    --term-ink: #EDE9DD;
   }
-  @media (prefers-color-scheme: light) {
+  @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #faf9f7;
-      --bg-card: #ffffff;
-      --text: #1e222b;
-      --text-dim: #6b7280;
-      --accent: #c2551f;
-      --accent-soft: rgba(194, 85, 31, 0.08);
-      --border: #e5e2dc;
-      --code-bg: #f0eeea;
+      --washi: #131E33;
+      --paper: #1A2740;
+      --ink: #E9EBEF;
+      --ai: #9FB8DF;
+      --dim: #8195B5;
+      --line: #2C3B58;
+      --term: #0E1729;
+      --term-ink: #EDE9DD;
     }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Hiragino Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
-    line-height: 1.75;
+    background: var(--washi);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "Noto Sans JP", -apple-system, sans-serif;
+    line-height: 1.85;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
-  header { padding: 88px 0 56px; }
-  .eyebrow {
-    color: var(--accent);
-    font-size: 0.85rem;
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 28px; }
+  a { color: var(--ai); }
+  :focus-visible { outline: 2px solid var(--shu); outline-offset: 3px; }
+
+  /* ---- header ---- */
+  .top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 28px 0 0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.82rem;
+  }
+  .top .repo { color: var(--dim); text-decoration: none; }
+  .top .repo:hover { color: var(--ai); }
+  .top .gh { margin-left: auto; }
+
+  /* 落款 —— この棚の判 */
+  .seal {
+    width: 58px; height: 58px;
+    background: var(--shu);
+    color: #FCFBF7;
+    font-family: "Zen Old Mincho", serif;
+    font-weight: 900;
+    font-size: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 14% 10% 16% 11%;
+    transform: rotate(-4deg);
+    box-shadow: inset 0 0 0 2.5px rgba(252, 251, 247, 0.28);
+    user-select: none;
+    flex-shrink: 0;
+  }
+  @keyframes stamp {
+    0%   { transform: scale(2.1) rotate(-11deg); opacity: 0; }
+    55%  { transform: scale(0.93) rotate(-3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(-4deg); }
+  }
+  .seal.stamp { animation: stamp 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) 0.25s backwards; }
+  @media (prefers-reduced-motion: reduce) {
+    .seal.stamp { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ---- hero ---- */
+  .hero { padding: 72px 0 64px; }
+  h1 {
+    font-family: "Zen Old Mincho", serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 5.6vw, 3rem);
+    line-height: 1.55;
+    letter-spacing: 0.04em;
+  }
+  .hero .lead {
+    margin-top: 26px;
+    max-width: 36em;
+    color: var(--dim);
+    font-size: 1rem;
+  }
+  .hero .lead strong { color: var(--ink); }
+
+  /* ---- 手順（本物の順序なので番号を使う） ---- */
+  .step { padding: 8px 0 48px; }
+  .step-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-family: "Zen Old Mincho", serif;
     font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-size: 1.3rem;
+    letter-spacing: 0.05em;
     margin-bottom: 16px;
   }
-  h1 {
-    font-size: clamp(1.9rem, 5vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
-  }
-  .lead { margin-top: 20px; font-size: 1.05rem; color: var(--text-dim); max-width: 40em; }
-  .lead strong { color: var(--text); font-weight: 700; }
-  section { padding: 40px 0; border-top: 1px solid var(--border); }
-  h2 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  h2 .num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: var(--accent-soft);
-    color: var(--accent);
-    font-size: 0.9rem;
-  }
-  .cmd {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--code-bg);
-    border: 1px solid var(--border);
+  .term {
+    background: var(--term);
+    color: var(--term-ink);
     border-radius: 10px;
-    padding: 14px 16px;
-    margin: 10px 0;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    padding: 15px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: "IBM Plex Mono", monospace;
     font-size: 0.88rem;
     overflow-x: auto;
   }
-  .cmd code { flex: 1; white-space: nowrap; }
-  .cmd button {
+  .term code { flex: 1; white-space: nowrap; }
+  .term button {
     flex-shrink: 0;
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+    border: 1px solid rgba(237, 233, 221, 0.35);
+    color: rgba(237, 233, 221, 0.8);
     border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.78rem;
-    cursor: pointer;
+    padding: 4px 14px;
+    font-size: 0.76rem;
     font-family: inherit;
+    cursor: pointer;
     transition: all 0.15s;
   }
-  .cmd button:hover { border-color: var(--accent); color: var(--accent); }
-  .cmd button.done { border-color: var(--accent); color: var(--accent); }
-  .hint { font-size: 0.85rem; color: var(--text-dim); margin-top: 8px; }
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    margin: 16px 0;
-    transition: border-color 0.15s;
+  .term button:hover, .term button.done {
+    border-color: var(--term-ink);
+    color: var(--term-ink);
+  }
+  .hint { font-size: 0.84rem; color: var(--dim); margin-top: 10px; }
+
+  /* ---- 棚 ---- */
+  .shelf-section { padding: 24px 0 72px; }
+  .shelf-title {
+    font-family: "Zen Old Mincho", serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .shelf-note { font-size: 0.84rem; color: var(--dim); margin-bottom: 36px; }
+
+  /* 棚板：プラグインはこの上に載る */
+  .shelf {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 0 28px;
+    align-items: end;
+    border-bottom: 7px solid var(--ink);
+    padding: 0 18px;
+  }
+  .shelf::before, .shelf::after {
+    content: "";
+    position: absolute;
+    bottom: -21px;
+    width: 10px; height: 14px;
+    background: var(--ink);
+  }
+  .shelf::before { left: 26px; }
+  .shelf::after { right: 26px; }
+
+  .item {
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    padding: 24px 24px 20px;
     cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
-  .card:hover { border-color: var(--accent); }
-  .card .name-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .card .name { font-size: 1.1rem; font-weight: 800; }
-  .card .ver {
-    font-size: 0.75rem;
-    color: var(--accent);
-    background: var(--accent-soft);
+  .item:hover, .item:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 22px -14px rgba(27, 43, 69, 0.45);
+  }
+  .item .name-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .item .name {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: 1.02rem;
+  }
+  .item .ver {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--ai);
+    border: 1px solid var(--ai);
     border-radius: 999px;
-    padding: 2px 10px;
-    font-family: ui-monospace, monospace;
+    padding: 1px 10px;
   }
-  .card p { margin-top: 8px; color: var(--text-dim); font-size: 0.95rem; }
-  .card .links { margin-top: 14px; display: flex; gap: 16px; flex-wrap: wrap; }
-  .card .more { color: var(--accent); font-size: 0.88rem; font-weight: 600; }
-  .card .install {
-    margin-top: 12px;
-    font-family: ui-monospace, monospace;
-    font-size: 0.82rem;
-    color: var(--text-dim);
-    background: var(--code-bg);
-    border-radius: 8px;
-    padding: 8px 12px;
+  .item p { margin-top: 10px; color: var(--dim); font-size: 0.92rem; }
+  .item .install {
+    margin-top: 14px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--dim);
     overflow-x: auto;
     white-space: nowrap;
   }
-  #plugin-list .loading, #detail .loading { color: var(--text-dim); font-size: 0.9rem; }
-  a { color: var(--accent); }
+  .item .more {
+    display: inline-block;
+    margin-top: 12px;
+    color: var(--ai);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+  #plugin-list .loading { padding: 24px; color: var(--dim); font-size: 0.9rem; }
 
-  /* ---- detail view ---- */
+  /* ---- detail (仕様書) ---- */
   #detail { display: none; }
   #detail.active { display: block; }
   #home.hidden { display: none; }
   .back {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin: 40px 0 0;
-    color: var(--text-dim);
+    display: inline-block;
+    margin: 44px 0 0;
+    color: var(--dim);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
   }
-  .back:hover { color: var(--accent); }
-  .detail-head { padding: 24px 0 8px; }
-  .detail-head .name-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-  .detail-head h1 { font-size: clamp(1.5rem, 4vw, 2rem); }
+  .back:hover { color: var(--ai); }
+  .detail-head { padding: 26px 0 8px; }
+  .detail-head .name-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .detail-head h1 {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
   .detail-head .ver {
-    font-size: 0.8rem;
-    color: var(--accent);
-    background: var(--accent-soft);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    color: var(--ai);
+    border: 1px solid var(--ai);
     border-radius: 999px;
     padding: 2px 12px;
-    font-family: ui-monospace, monospace;
   }
-  .detail-head .gh { font-size: 0.88rem; font-weight: 600; text-decoration: none; }
-  .detail-head .gh:hover { text-decoration: underline; }
+  .detail-head .gh-link { font-size: 0.88rem; font-weight: 600; text-decoration: none; }
+  .detail-head .gh-link:hover { text-decoration: underline; }
+  .detail-head .term { margin: 18px 0 14px; }
 
-  /* ---- rendered markdown ---- */
   .md {
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
-    padding: 32px 0 64px;
+    border-top: 1.5px solid var(--line);
+    margin-top: 26px;
+    padding: 34px 0 72px;
     font-size: 0.95rem;
   }
-  .md h1, .md h2, .md h3 { margin: 1.6em 0 0.6em; line-height: 1.4; font-weight: 800; display: block; }
-  .md h1 { font-size: 1.5rem; }
-  .md h2 { font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-  .md h3 { font-size: 1.05rem; }
+  .md h1, .md h2, .md h3 {
+    font-family: "Zen Old Mincho", serif;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 1.7em 0 0.6em;
+    letter-spacing: 0.03em;
+  }
+  .md h1 { font-size: 1.45rem; }
+  .md h2 { font-size: 1.18rem; border-bottom: 1.5px solid var(--line); padding-bottom: 8px; }
+  .md h3 { font-size: 1.02rem; }
   .md h1:first-child { margin-top: 0; }
   .md p, .md ul, .md ol, .md table, .md blockquote { margin: 0.9em 0; }
   .md ul, .md ol { padding-left: 1.6em; }
   .md li { margin: 0.3em 0; }
-  .md img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); }
+  .md img { max-width: 100%; border-radius: 8px; border: 1.5px solid var(--line); }
   .md code {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 0.85em;
-    background: var(--code-bg);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.84em;
+    background: rgba(46, 78, 128, 0.09);
     border-radius: 5px;
     padding: 2px 6px;
   }
   .md pre {
-    background: var(--code-bg);
-    border: 1px solid var(--border);
+    background: var(--term);
+    color: var(--term-ink);
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 15px 18px;
     overflow-x: auto;
     margin: 0.9em 0;
   }
-  .md pre code { background: none; padding: 0; font-size: 0.85rem; }
+  .md pre code { background: none; padding: 0; font-size: 0.84rem; }
   .md table { border-collapse: collapse; display: block; overflow-x: auto; }
-  .md th, .md td { border: 1px solid var(--border); padding: 8px 14px; text-align: left; }
-  .md th { background: var(--code-bg); font-weight: 700; }
-  .md blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text-dim); }
-  .md hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  .md th, .md td { border: 1.5px solid var(--line); padding: 8px 14px; text-align: left; }
+  .md th { background: rgba(46, 78, 128, 0.07); font-weight: 700; }
+  .md blockquote { border-left: 3px solid var(--ai); padding-left: 16px; color: var(--dim); }
+  .md hr { border: none; border-top: 1.5px solid var(--line); margin: 2em 0; }
 
   footer {
-    border-top: 1px solid var(--border);
-    padding: 40px 0 64px;
-    color: var(--text-dim);
-    font-size: 0.85rem;
+    border-top: 1.5px solid var(--line);
+    padding: 40px 0 72px;
+    color: var(--dim);
+    font-size: 0.84rem;
   }
-  footer a { color: var(--text-dim); }
-  footer a:hover { color: var(--accent); }
+  footer a { color: var(--dim); }
+  footer a:hover { color: var(--ai); }
+
+  @media (max-width: 560px) {
+    .hero { padding: 52px 0 44px; }
+    .shelf { padding: 0 10px; grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <div id="home">
-  <header>
-    <div class="eyebrow">Claude Code Plugin Marketplace</div>
-    <h1>kzhrknt の<br>プラグイン棚</h1>
-    <p class="lead">
-      AI活用の実務パイプラインを、Claude Code プラグインとして配布しています。
-      <strong>棚の登録は一度だけ。</strong>あとは欲しいものを install するだけで、以後の新作もこの棚に並びます。
-    </p>
+  <header class="top">
+    <span class="seal stamp" aria-hidden="true">棚</span>
+    <a class="repo" href="https://github.com/kzhrknt/claude-plugins">kzhrknt / claude-plugins</a>
+    <a class="repo gh" href="https://github.com/kzhrknt">GitHub</a>
   </header>
 
-  <section>
-    <h2><span class="num">1</span>棚を登録する（初回のみ）</h2>
-    <div class="cmd">
+  <section class="hero">
+    <h1>良い道具は、<br>棚に並べておく。</h1>
+    <p class="lead">
+      AI活用の実務パイプラインを、Claude Code のプラグインとして自作し、この棚に並べています。
+      <strong>棚の登録は一度だけ。</strong>あとは欲しい道具を install するだけで、以後の新作もここに増えていきます。
+    </p>
+  </section>
+
+  <section class="step">
+    <div class="step-label">STEP 1 — 初回のみ</div>
+    <div class="step-title">棚を登録する</div>
+    <div class="term">
       <code>/plugin marketplace add kzhrknt/claude-plugins</code>
       <button onclick="copyCmd(event, this)">コピー</button>
     </div>
     <p class="hint">Claude Code のプロンプトにそのまま貼り付けてください。</p>
   </section>
 
-  <section>
-    <h2><span class="num">2</span>プラグインを選んで入れる</h2>
-    <div id="plugin-list"><p class="loading">プラグイン一覧を読み込み中…</p></div>
-    <p class="hint">カードをクリックすると詳細（README）が読めます。</p>
+  <section class="shelf-section">
+    <div class="step-label">STEP 2</div>
+    <div class="shelf-title">道具を選んで install する</div>
+    <p class="shelf-note">道具をクリックすると仕様書（README）が読めます。</p>
+    <div class="shelf" id="plugin-list"><p class="loading">棚卸し中…</p></div>
   </section>
 </div>
 
@@ -254,8 +362,8 @@
 
 <footer>
   <p>
-    <a href="https://github.com/kzhrknt/claude-plugins">GitHub: kzhrknt/claude-plugins</a>
-    ・ 各プラグインの必要環境・権利上の注意は各リポジトリの README を参照
+    この棚の道具はすべて <a href="https://github.com/kzhrknt">kzhrknt</a> の自作です。
+    各道具の必要環境・権利上の注意は仕様書（README）をご覧ください。
   </p>
 </footer>
 
@@ -284,8 +392,11 @@ function renderList() {
   list.innerHTML = "";
   catalog.plugins.forEach(p => {
     const card = document.createElement("div");
-    card.className = "card";
-    card.onclick = () => { location.hash = "#/p/" + p.name; };
+    card.className = "item";
+    card.tabIndex = 0;
+    const go = () => { location.hash = "#/p/" + p.name; };
+    card.onclick = go;
+    card.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
     card.innerHTML = `
       <div class="name-row">
         <span class="name">${p.name}</span>
@@ -293,7 +404,7 @@ function renderList() {
       </div>
       <p>${p.description || ""}</p>
       <div class="install">/plugin install ${p.name}@${catalog.name}</div>
-      <div class="links"><span class="more">詳細を見る →</span></div>`;
+      <span class="more">仕様書を読む →</span>`;
     list.appendChild(card);
   });
 }
@@ -301,7 +412,7 @@ function renderList() {
 async function renderDetail(name) {
   const p = catalog.plugins.find(x => x.name === name);
   const body = document.getElementById("detail-body");
-  if (!p) { body.innerHTML = '<p class="loading">プラグインが見つかりません。</p>'; return; }
+  if (!p) { body.innerHTML = '<p class="loading">この道具は棚にありません。</p>'; return; }
   const repo = repoOf(p);
   body.innerHTML = `
     <div class="detail-head">
@@ -310,13 +421,13 @@ async function renderDetail(name) {
         ${p.version ? `<span class="ver">v${p.version}</span>` : ""}
       </div>
       <p class="hint">${p.description || ""}</p>
-      <div class="cmd">
+      <div class="term">
         <code>/plugin install ${p.name}@${catalog.name}</code>
         <button onclick="copyCmd(event, this)">コピー</button>
       </div>
-      ${repo ? `<a class="gh" href="https://github.com/${repo}">GitHub リポジトリ →</a>` : ""}
+      ${repo ? `<a class="gh-link" href="https://github.com/${repo}">GitHub リポジトリ →</a>` : ""}
     </div>
-    <div class="md"><p class="loading">README を読み込み中…</p></div>`;
+    <div class="md"><p class="loading">仕様書を読み込み中…</p></div>`;
   if (!repo) return;
 
   const rawBase = `https://raw.githubusercontent.com/${repo}/main/`;
@@ -326,7 +437,6 @@ async function renderDetail(name) {
     if (!res.ok) throw new Error(res.status);
     const text = await res.text();
     mdEl.innerHTML = DOMPurify.sanitize(marked.parse(text));
-    // README内の相対パス（画像・リンク）をリポジトリ基準の絶対URLに直す
     mdEl.querySelectorAll("img").forEach(img => {
       const src = img.getAttribute("src") || "";
       if (!/^(https?:)?\/\//.test(src)) img.src = rawBase + src.replace(/^\.\//, "");
@@ -336,7 +446,7 @@ async function renderDetail(name) {
       if (!/^(https?:)?\/\/|^#/.test(href)) a.href = `https://github.com/${repo}/blob/main/` + href.replace(/^\.\//, "");
     });
   } catch (e) {
-    mdEl.innerHTML = `<p class="loading">README を取得できませんでした。<a href="https://github.com/${repo}">GitHubで見る →</a></p>`;
+    mdEl.innerHTML = `<p class="loading">仕様書を取得できませんでした。<a href="https://github.com/${repo}">GitHubで見る →</a></p>`;
   }
 }
 
@@ -360,7 +470,7 @@ fetch(CATALOG)
   .then(mp => { catalog = mp; renderList(); route(); })
   .catch(() => {
     document.getElementById("plugin-list").innerHTML =
-      '<p class="loading">一覧を取得できませんでした。<a href="https://github.com/kzhrknt/claude-plugins">GitHubで見る →</a></p>';
+      '<p class="loading">棚卸しに失敗しました。<a href="https://github.com/kzhrknt/claude-plugins">GitHubで見る →</a></p>';
   });
 
 window.addEventListener("hashchange", route);

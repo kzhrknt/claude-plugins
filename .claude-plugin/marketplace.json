@@ -17,6 +17,18 @@
       "author": {
         "name": "kzhrknt"
       }
+    },
+    {
+      "name": "mov-to-conte",
+      "source": {
+        "source": "github",
+        "repo": "kzhrknt/mov-to-conte"
+      },
+      "description": "動画（ローカル or YouTube等のURL）から16:9の絵コンテPDF/PPTXを生成する全ローカルパイプライン（カット検出 + Whisper ASR + エージェント注釈）",
+      "version": "1.3.0",
+      "author": {
+        "name": "kzhrknt"
+      }
     }
   ]
 }

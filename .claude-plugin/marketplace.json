@@ -29,6 +29,18 @@
       "author": {
         "name": "kzhrknt"
       }
+    },
+    {
+      "name": "humanize-ja",
+      "source": {
+        "source": "github",
+        "repo": "kzhrknt/humanize-ja"
+      },
+      "description": "AIが書いた日本語から、AI特有の癖（誇張・定型の前置き・比喩の動詞・主語の消えた文・名詞の詰め込み）を抜いて人の文章に戻す。提案書・企画書・技術文書・記事に",
+      "version": "1.0.0",
+      "author": {
+        "name": "kzhrknt"
+      }
     }
   ]
 }
